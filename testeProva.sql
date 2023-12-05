@@ -303,7 +303,8 @@ INSERT INTO viagem VALUES
 go
 select * from carro
 select * from empresa
-select * from viagem where idCarro = 1009
+select * from viagem
+order by distanciaPercorrida desc
 
 GO
 
@@ -330,11 +331,15 @@ order by MediaDist desc
 
 GO
 
-select e.nome, MAX(v.distanciaPercorrida) as dist
-from empresa e, viagem v, carro c
+select e.nome
+FROM empresa e, viagem v, carro c
 where e.id = c.idEmpresa and c.id = v.idCarro
-group by e.nome
-having MAX(v.distanciaPercorrida)
+	  and v.distanciaPercorrida in
+	(
+		select max(v.distanciaPercorrida)
+		FROM empresa e, viagem v, carro c
+		where e.id = c.idEmpresa and c.id = v.idCarro
+	)
 
 GO
 
@@ -366,5 +371,14 @@ group by c.modelo, e.nome
 OrDER BY QtdViagens desc, e.nome asc
 
 GO
+
+select e.nome, c.marca, c.modelo, v.distanciaPercorrida,
+		case when (v.distanciaPercorrida < 1000) then
+				 'R$ ' + Cast(v.distanciaPercorrida * 10 as varchar(15))
+		else	
+				'R$ ' + Cast(v.distanciaPercorrida * 15 as varchar(15))
+		end as precoTotal
+from empresa e, viagem v, carro c
+where e.id = c.idEmpresa and c.id = v.idCarro
 
 
